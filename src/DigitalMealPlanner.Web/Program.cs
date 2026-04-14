@@ -1,3 +1,4 @@
+using Anthropic.SDK;
 using DigitalMealPlanner.Web.Infrastructure.AI;
 using DigitalMealPlanner.Web.Infrastructure.Data;
 using DigitalMealPlanner.Web.Infrastructure.Data.Entities;
@@ -8,8 +9,6 @@ using DigitalMealPlanner.Web.Modules.MealPlan;
 using DigitalMealPlanner.Web.Modules.Recipes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using OpenAI;
-using OpenAI.Chat;
 using QuestPDF.Infrastructure;
 
 QuestPDF.Settings.License = LicenseType.Community;
@@ -43,14 +42,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// --- OpenAI --- reads from CLAUDE_API env var, falls back to appsettings
-var openAiKey = Environment.GetEnvironmentVariable("CLAUDE_API")
-    ?? builder.Configuration["OpenAI:ApiKey"]
+// --- Anthropic --- reads from CLAUDE_API env var, falls back to appsettings
+var anthropicKey = Environment.GetEnvironmentVariable("CLAUDE_API")
+    ?? builder.Configuration["Anthropic:ApiKey"]
     ?? string.Empty;
-var openAiModel = builder.Configuration["OpenAI:Model"] ?? "gpt-4o";
-builder.Services.AddSingleton(_ => new OpenAIClient(openAiKey));
-builder.Services.AddSingleton(sp =>
-    sp.GetRequiredService<OpenAIClient>().GetChatClient(openAiModel));
+builder.Services.AddSingleton(_ => new AnthropicClient(anthropicKey));
 
 // --- App Services ---
 builder.Services.AddScoped<ICookbookService, CookbookService>();
