@@ -25,7 +25,7 @@ public class RecipeImportController(
         var cookbook = await cookbookService.GetByIdAsync(cookbookId, UserId);
         if (cookbook is null) return NotFound();
 
-        return View(new RecipeImportViewModel
+        return View("~/Modules/Recipes/Views/Import.cshtml", new RecipeImportViewModel
         {
             CookbookId = cookbookId,
             CookbookName = cookbook.Name
@@ -43,13 +43,13 @@ public class RecipeImportController(
         {
             ModelState.AddModelError(string.Empty, "Please select an image.");
             model.CookbookName = cookbook.Name;
-            return View(model);
+            return View("~/Modules/Recipes/Views/Import.cshtml", model);
         }
 
         // Save image
         var imagePath = await imageStorage.SaveAsync(model.Image);
 
-        // Call GPT-4o Vision
+        // Call Claude Vision
         RecipeDraft draft;
         try
         {
@@ -59,7 +59,7 @@ public class RecipeImportController(
         {
             ModelState.AddModelError(string.Empty, $"AI extraction failed: {ex.Message}. You can enter the recipe manually.");
             model.CookbookName = cookbook.Name;
-            return View(model);
+            return View("~/Modules/Recipes/Views/Import.cshtml", model);
         }
 
         // Map draft -> review view model
@@ -90,7 +90,7 @@ public class RecipeImportController(
             }).ToList()
         };
 
-        return View("Review", review);
+        return View("~/Modules/Recipes/Views/Review.cshtml", review);
     }
 
     [HttpPost("/cookbooks/{cookbookId}/recipes/import/save")]
@@ -101,7 +101,7 @@ public class RecipeImportController(
         {
             var cookbook = await cookbookService.GetByIdAsync(cookbookId, UserId);
             model.CookbookName = cookbook?.Name ?? string.Empty;
-            return View("Review", model);
+            return View("~/Modules/Recipes/Views/Review.cshtml", model);
         }
 
         var steps = model.StepsRaw

@@ -22,7 +22,7 @@ public class RecipesController(
     {
         var recipe = await recipeService.GetByIdAsync(recipeId, UserId);
         if (recipe is null || recipe.CookbookId != cookbookId) return NotFound();
-        return View(recipe);
+        return View("~/Modules/Recipes/Views/Detail.cshtml", recipe);
     }
 
     [HttpGet("/cookbooks/{cookbookId}/recipes/{recipeId}/edit")]
@@ -60,14 +60,14 @@ public class RecipesController(
                 CaloriesPerUnit = i.CaloriesPerUnit
             }).ToList()
         };
-        return View(vm);
+        return View("~/Modules/Recipes/Views/Edit.cshtml", vm);
     }
 
     [HttpPost("/cookbooks/{cookbookId}/recipes/{recipeId}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int cookbookId, int recipeId, RecipeReviewViewModel model, IFormFile? newImage)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid) return View("~/Modules/Recipes/Views/Edit.cshtml", model);
 
         var steps = model.StepsRaw
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
