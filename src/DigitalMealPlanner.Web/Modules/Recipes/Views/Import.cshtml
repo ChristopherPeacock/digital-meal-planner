@@ -1,0 +1,79 @@
+@model DigitalMealPlanner.Web.Modules.Recipes.Models.RecipeImportViewModel
+@{
+    ViewData["Title"] = "Import Recipe";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1>Import Recipe</h1>
+    <a href="/cookbooks/@Model.CookbookId" class="btn btn-outline btn-sm">← @Model.CookbookName</a>
+</div>
+
+<div class="import-wrap">
+    <form method="post" action="/cookbooks/@Model.CookbookId/recipes/import"
+          enctype="multipart/form-data" id="import-form">
+        @Html.AntiForgeryToken()
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div class="alert-danger mb-2">@err.ErrorMessage</div>
+            }
+        }
+
+        <div id="drop-zone" class="drop-zone">
+            <input type="file" id="image-input" name="Image" accept="image/jpeg,image/png,image/webp" style="display:none" />
+            <img id="image-preview" src="" alt="Preview" style="display:none;max-height:320px;border-radius:.6rem;margin-bottom:1rem;" />
+            <div class="drop-icon">📸</div>
+            <div class="drop-label">Drop your TikTok screenshot here, or click to browse</div>
+            <div class="drop-sub">JPG · PNG · WEBP</div>
+        </div>
+
+        <button type="submit" id="extract-btn" class="btn btn-primary" style="width:100%;margin-top:1rem" disabled>
+            <span id="btn-idle">✨ Extract with AI</span>
+            <span id="btn-loading" style="display:none">Analysing with GPT-4o…</span>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    const dropZone   = document.getElementById('drop-zone');
+    const input      = document.getElementById('image-input');
+    const preview    = document.getElementById('image-preview');
+    const label      = document.querySelector('.drop-label');
+    const extractBtn = document.getElementById('extract-btn');
+    const form       = document.getElementById('import-form');
+    const btnIdle    = document.getElementById('btn-idle');
+    const btnLoading = document.getElementById('btn-loading');
+
+    function setFile(file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+
+        label.textContent = file.name;
+        extractBtn.disabled = false;
+    }
+
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop',      e  => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+    dropZone.addEventListener('click',     ()  => input.click());
+    input.addEventListener('change',       ()  => { if (input.files[0]) setFile(input.files[0]); });
+
+    form.addEventListener('submit', () => {
+        btnIdle.style.display    = 'none';
+        btnLoading.style.display = 'inline';
+        extractBtn.disabled      = true;
+    });
+</script>
+}

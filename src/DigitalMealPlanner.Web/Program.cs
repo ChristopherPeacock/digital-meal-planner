@@ -43,8 +43,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// --- OpenAI ---
-var openAiKey = builder.Configuration["OpenAI:ApiKey"] ?? string.Empty;
+// --- OpenAI --- reads from CLAUDE_API env var, falls back to appsettings
+var openAiKey = Environment.GetEnvironmentVariable("CLAUDE_API")
+    ?? builder.Configuration["OpenAI:ApiKey"]
+    ?? string.Empty;
 var openAiModel = builder.Configuration["OpenAI:Model"] ?? "gpt-4o";
 builder.Services.AddSingleton(_ => new OpenAIClient(openAiKey));
 builder.Services.AddSingleton(sp =>

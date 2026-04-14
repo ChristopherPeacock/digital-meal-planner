@@ -1,0 +1,106 @@
+@using System.Text.Json
+@model DigitalMealPlanner.Web.Infrastructure.Data.Entities.Recipe
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_Layout";
+    var steps = JsonSerializer.Deserialize<List<string>>(Model.StepsJson) ?? [];
+    var tags  = JsonSerializer.Deserialize<List<string>>(Model.TagsJson)  ?? [];
+}
+
+<div class="page-header">
+    <div>
+        <a href="/cookbooks/@Model.CookbookId" style="font-size:.8rem;color:var(--muted);text-decoration:none;">← @Model.Cookbook.Name</a>
+        <h1 style="margin-top:.1rem">@Model.Title</h1>
+        @if (tags.Any())
+        {
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem">
+                @foreach (var tag in tags)
+                {
+                    <span class="tag">@tag</span>
+                }
+            </div>
+        }
+    </div>
+    <div style="display:flex;gap:.5rem">
+        <a href="/cookbooks/@Model.CookbookId/recipes/@Model.Id/edit" class="btn btn-outline btn-sm">Edit</a>
+        <form method="post" action="/cookbooks/@Model.CookbookId/recipes/@Model.Id/delete"
+              onsubmit="return confirm('Delete this recipe?')" style="display:inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="detail-layout">
+
+    <!-- Image -->
+    @if (!string.IsNullOrEmpty(Model.ImagePath))
+    {
+        <div class="img-card card" style="margin-bottom:1.25rem">
+            <img src="@Model.ImagePath" alt="@Model.Title" style="width:100%;display:block;max-height:320px;object-fit:cover;" />
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:1rem">@Model.Description</p>
+    }
+
+    <!-- Macros -->
+    <div class="lbl">Macros per serving</div>
+    <div class="macros">
+        <div class="tile hi">
+            <div class="tv">@Model.CaloriesPerServing</div>
+            <div class="tl">Kcal</div>
+        </div>
+        <div class="tile">
+            <div class="tv">@Model.ProteinG<span style="font-size:.7rem">g</span></div>
+            <div class="tl">Protein</div>
+        </div>
+        <div class="tile">
+            <div class="tv">@Model.CarbsG<span style="font-size:.7rem">g</span></div>
+            <div class="tl">Carbs</div>
+        </div>
+        <div class="tile">
+            <div class="tv">@Model.FatG<span style="font-size:.7rem">g</span></div>
+            <div class="tl">Fat</div>
+        </div>
+        <div class="tile">
+            <div class="tv">@(Model.PrepMinutes + Model.CookMinutes)</div>
+            <div class="tl">Mins</div>
+        </div>
+    </div>
+
+    <!-- Ingredients -->
+    <div class="lbl" style="margin-top:1.25rem">Ingredients · @Model.Servings serving@(Model.Servings == 1 ? "" : "s")</div>
+    @if (Model.Ingredients.Any())
+    {
+        <ul class="ingredient-list">
+            @foreach (var ing in Model.Ingredients)
+            {
+                <li>
+                    <span class="ing-name">@ing.Name</span>
+                    <span class="ing-meta">
+                        <span>@ing.Quantity @ing.Unit</span>
+                        @if (ing.CaloriesPerUnit > 0)
+                        {
+                            <span class="ing-cal">@ing.CaloriesPerUnit kcal</span>
+                        }
+                    </span>
+                </li>
+            }
+        </ul>
+    }
+
+    <!-- Steps -->
+    @if (steps.Any())
+    {
+        <div class="lbl" style="margin-top:1.25rem">Method</div>
+        <ol class="steps-list">
+            @foreach (var step in steps)
+            {
+                <li>@step</li>
+            }
+        </ol>
+    }
+</div>
