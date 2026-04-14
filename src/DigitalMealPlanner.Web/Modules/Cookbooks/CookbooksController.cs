@@ -11,9 +11,11 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
 {
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+    [HttpGet("/cookbooks")]
     public async Task<IActionResult> Index() =>
         View(await cookbookService.GetAllAsync(UserId));
 
+    [HttpGet("/cookbooks/{id}")]
     public async Task<IActionResult> Detail(int id)
     {
         var cookbook = await cookbookService.GetByIdAsync(id, UserId);
@@ -21,10 +23,10 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
         return View(cookbook);
     }
 
-    [HttpGet]
+    [HttpGet("/cookbooks/create")]
     public IActionResult Create() => View(new CookbookFormViewModel());
 
-    [HttpPost, ValidateAntiForgeryToken]
+    [HttpPost("/cookbooks/create"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CookbookFormViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
@@ -34,10 +36,10 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
             imagePath = await imageStorage.SaveAsync(model.CoverImage);
 
         var cookbook = await cookbookService.CreateAsync(UserId, model.Name, model.Description, imagePath);
-        return RedirectToAction(nameof(Detail), new { id = cookbook.Id });
+        return Redirect($"/cookbooks/{cookbook.Id}");
     }
 
-    [HttpGet]
+    [HttpGet("/cookbooks/{id}/edit")]
     public async Task<IActionResult> Edit(int id)
     {
         var cookbook = await cookbookService.GetByIdAsync(id, UserId);
@@ -52,7 +54,7 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
         });
     }
 
-    [HttpPost, ValidateAntiForgeryToken]
+    [HttpPost("/cookbooks/{id}/edit"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, CookbookFormViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
@@ -62,13 +64,13 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
             newImagePath = await imageStorage.SaveAsync(model.CoverImage);
 
         await cookbookService.UpdateAsync(id, UserId, model.Name, model.Description, newImagePath);
-        return RedirectToAction(nameof(Detail), new { id });
+        return Redirect($"/cookbooks/{id}");
     }
 
-    [HttpPost, ValidateAntiForgeryToken]
+    [HttpPost("/cookbooks/{id}/delete"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         await cookbookService.DeleteAsync(id, UserId);
-        return RedirectToAction(nameof(Index));
+        return Redirect("/cookbooks");
     }
 }
