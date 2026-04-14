@@ -1,0 +1,41 @@
+@model CookbookFormViewModel
+@{
+    ViewData["Title"] = "Edit Cookbook";
+    Layout = "_Layout";
+}
+
+<div class="form-panel">
+    <h1>Edit Cookbook</h1>
+    <form method="post" action="/cookbooks/@Model.Id/edit" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label asp-for="Name">Cookbook Name</label>
+            <input asp-for="Name" class="form-control" autofocus />
+            <span asp-validation-for="Name" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description">Description</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ExistingCoverImagePath))
+        {
+            <div class="form-group">
+                <div class="lbl">Current Cover</div>
+                <img src="@Model.ExistingCoverImagePath" alt="Cover" style="max-height:120px;border-radius:.5rem;" />
+            </div>
+        }
+
+        <div class="form-group">
+            <label asp-for="CoverImage">Replace Cover Image</label>
+            <input asp-for="CoverImage" type="file" class="form-control" accept="image/*" />
+        </div>
+
+        <div class="action-bar">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="/cookbooks/@Model.Id" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,36 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = "_Layout";
+}
+
+<div class="login-wrap">
+    <div class="login-card">
+        <h1>Meal Planner</h1>
+        <p class="sub">Your personal cookbook &amp; planner</p>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-danger">Invalid username or password.</div>
+        }
+
+        <form method="post" action="/login">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+
+            <div class="form-group">
+                <label for="Username">Username</label>
+                <input type="text" id="Username" name="Username" class="form-control"
+                       value="@Model.Username" autocomplete="username" autofocus />
+            </div>
+
+            <div class="form-group">
+                <label for="Password">Password</label>
+                <input type="password" id="Password" name="Password" class="form-control"
+                       autocomplete="current-password" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+    </div>
+</div>

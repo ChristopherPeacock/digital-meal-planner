@@ -1,0 +1,52 @@
+@model Cookbook
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1>@Model.Name</h1>
+    <div style="display:flex;gap:.5rem">
+        <a href="/cookbooks/@Model.Id/edit" class="btn btn-outline btn-sm">Edit</a>
+        <a href="/cookbooks/@Model.Id/recipes/import" class="btn btn-primary btn-sm">+ Add Recipe</a>
+        <form method="post" action="/cookbooks/@Model.Id/delete" style="display:inline"
+              onsubmit="return confirm('Delete this cookbook and all its recipes?')">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <p class="muted mb-2">@Model.Description</p>
+}
+
+@if (!Model.Recipes.Any())
+{
+    <div class="empty-state">
+        <div class="icon">🍳</div>
+        <h2>No Recipes Yet</h2>
+        <p>Upload a TikTok screenshot and GPT-4o will extract the recipe for you.</p>
+        <a href="/cookbooks/@Model.Id/recipes/import" class="btn btn-primary mt-2">Import Recipe</a>
+    </div>
+}
+else
+{
+    <div class="lbl">Recipes</div>
+    <div class="recipe-grid">
+        @foreach (var r in Model.Recipes)
+        {
+            <a href="/cookbooks/@Model.Id/recipes/@r.Id" class="recipe-card card">
+                @if (!string.IsNullOrEmpty(r.ImagePath))
+                {
+                    <img src="@r.ImagePath" alt="@r.Title" class="card-img" />
+                }
+                <div class="card-body">
+                    <h3>@r.Title</h3>
+                    <div class="meta">@r.CaloriesPerServing kcal · @(r.PrepMinutes + r.CookMinutes) min</div>
+                </div>
+            </a>
+        }
+    </div>
+}

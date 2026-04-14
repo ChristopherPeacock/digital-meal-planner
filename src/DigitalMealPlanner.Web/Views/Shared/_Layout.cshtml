@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Meal Planner")</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+</head>
+<body>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <nav class="app-nav">
+            <a class="nav-brand" href="/">🍽️ Meal Planner</a>
+            <div class="nav-links">
+                <a href="/cookbooks">Cookbooks</a>
+                <a href="/mealplan">Planner</a>
+                <a href="/themes">Themes</a>
+            </div>
+            <form method="post" action="/logout" class="nav-logout">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-ghost">Sign Out</button>
+            </form>
+        </nav>
+    }
+
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
