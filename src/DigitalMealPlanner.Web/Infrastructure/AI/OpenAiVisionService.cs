@@ -4,7 +4,7 @@ using DigitalMealPlanner.Web.Modules.Recipes.Models;
 
 namespace DigitalMealPlanner.Web.Infrastructure.AI;
 
-public class OpenAiVisionService(IConfiguration configuration, IWebHostEnvironment env, ILogger<OpenAiVisionService> logger)
+public class OpenAiVisionService(IConfiguration configuration, ILogger<OpenAiVisionService> logger)
     : IGptVisionService
 {
     private const string Prompt = """
@@ -41,7 +41,7 @@ public class OpenAiVisionService(IConfiguration configuration, IWebHostEnvironme
         Return only the JSON object.
         """;
 
-    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imagePath)
+    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imageDataUri)
     {
         var apiKey =
             Environment.GetEnvironmentVariable("OPENAI_API", EnvironmentVariableTarget.Process)
@@ -55,9 +55,7 @@ public class OpenAiVisionService(IConfiguration configuration, IWebHostEnvironme
 
         var model = configuration["OpenAI:Model"] ?? "gpt-4o";
 
-        var fullPath = Path.Combine(env.WebRootPath, imagePath.TrimStart('/'));
-        var imageBytes = await File.ReadAllBytesAsync(fullPath);
-        var mediaType = GetMediaType(fullPath);
+        var (mediaType, imageBytes) = ParseDataUri(imageDataUri);
 
         var client = new ChatClient(model, apiKey);
 
@@ -86,12 +84,12 @@ public class OpenAiVisionService(IConfiguration configuration, IWebHostEnvironme
         }) ?? throw new InvalidOperationException("OpenAI returned unparseable JSON.");
     }
 
-    private static string GetMediaType(string path) =>
-        Path.GetExtension(path).ToLower() switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png"            => "image/png",
-            ".webp"           => "image/webp",
-            _                 => "image/jpeg"
-        };
+    private static (string mediaType, byte[] bytes) ParseDataUri(string dataUri)
+    {
+        // Format: data:<mediaType>;base64,<data>
+        var comma = dataUri.IndexOf(',');
+        var header = dataUri[5..comma]; // strip leading "data:"
+        var semicolon = header.IndexOf(';');
+        return (header[..semicolon], Convert.FromBase64String(dataUri[(comma + 1)..]));
+    }
 }

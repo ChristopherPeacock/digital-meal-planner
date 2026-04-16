@@ -5,7 +5,7 @@ using DigitalMealPlanner.Web.Modules.Recipes.Models;
 
 namespace DigitalMealPlanner.Web.Infrastructure.AI;
 
-public class GptVisionService(AnthropicClient client, IWebHostEnvironment env, ILogger<GptVisionService> logger)
+public class GptVisionService(AnthropicClient client, ILogger<GptVisionService> logger)
     : IGptVisionService
 {
     private const string Model = "claude-opus-4-6";
@@ -44,12 +44,9 @@ public class GptVisionService(AnthropicClient client, IWebHostEnvironment env, I
         Return only the JSON object.
         """;
 
-    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imagePath)
+    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imageDataUri)
     {
-        var fullPath = Path.Combine(env.WebRootPath, imagePath.TrimStart('/'));
-        var imageBytes = await File.ReadAllBytesAsync(fullPath);
-        var base64 = Convert.ToBase64String(imageBytes);
-        var mediaType = GetMediaType(fullPath);
+        var (mediaType, base64) = ParseDataUri(imageDataUri);
 
         var messages = new List<Message>
         {
@@ -98,12 +95,12 @@ public class GptVisionService(AnthropicClient client, IWebHostEnvironment env, I
         }) ?? throw new InvalidOperationException("Claude returned unparseable JSON.");
     }
 
-    private static string GetMediaType(string path) =>
-        Path.GetExtension(path).ToLower() switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png"            => "image/png",
-            ".webp"           => "image/webp",
-            _                 => "image/jpeg"
-        };
+    private static (string mediaType, string base64) ParseDataUri(string dataUri)
+    {
+        // Format: data:<mediaType>;base64,<data>
+        var comma = dataUri.IndexOf(',');
+        var header = dataUri[5..comma]; // strip leading "data:"
+        var semicolon = header.IndexOf(';');
+        return (header[..semicolon], dataUri[(comma + 1)..]);
+    }
 }
