@@ -42,11 +42,22 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// --- Anthropic --- reads from CLAUDE_API env var, falls back to appsettings
-var anthropicKey = Environment.GetEnvironmentVariable("CLAUDE_API")
+// --- Anthropic --- tries process → user → machine env var, then appsettings
+var anthropicKey =
+    Environment.GetEnvironmentVariable("CLAUDE_API", EnvironmentVariableTarget.Process)
+    ?? Environment.GetEnvironmentVariable("CLAUDE_API", EnvironmentVariableTarget.User)
+    ?? Environment.GetEnvironmentVariable("CLAUDE_API", EnvironmentVariableTarget.Machine)
     ?? builder.Configuration["Anthropic:ApiKey"]
     ?? string.Empty;
 builder.Services.AddSingleton(_ => new AnthropicClient(anthropicKey));
+
+// --- OpenAI key --- tries standard env var, then appsettings
+var openAiKey =
+    Environment.GetEnvironmentVariable("OPENAI_API", EnvironmentVariableTarget.Process)
+    ?? Environment.GetEnvironmentVariable("OPENAI_API", EnvironmentVariableTarget.User)
+    ?? Environment.GetEnvironmentVariable("OPENAI_API", EnvironmentVariableTarget.Machine)
+    ?? builder.Configuration["OpenAI:ApiKey"]
+    ?? string.Empty;
 
 // --- App Services ---
 builder.Services.AddScoped<ICookbookService, CookbookService>();
@@ -54,7 +65,12 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IMealPlanService, MealPlanService>();
 builder.Services.AddScoped<ICalorieService, CalorieService>();
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
-builder.Services.AddScoped<IGptVisionService, GptVisionService>();
+
+// Vision: always register both; FallbackVisionService tries Claude first,
+// then automatically retries with OpenAI if Claude throws.
+builder.Services.AddScoped<GptVisionService>();
+builder.Services.AddScoped<OpenAiVisionService>();
+builder.Services.AddScoped<IGptVisionService, FallbackVisionService>();
 
 // --- MVC with feature folder view locations ---
 builder.Services.AddControllersWithViews()

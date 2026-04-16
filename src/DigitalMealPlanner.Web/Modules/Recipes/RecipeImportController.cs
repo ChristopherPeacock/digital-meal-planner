@@ -74,10 +74,10 @@ public class RecipeImportController(
             PrepMinutes = draft.PrepMinutes,
             CookMinutes = draft.CookMinutes,
             CuisineType = draft.CuisineType,
-            CaloriesPerServing = draft.CaloriesPerServing,
-            ProteinG = draft.ProteinG,
-            CarbsG = draft.CarbsG,
-            FatG = draft.FatG,
+            CaloriesPerServing = (int)Math.Round(draft.CaloriesPerServing),
+            ProteinG = (int)Math.Round(draft.ProteinG),
+            CarbsG = (int)Math.Round(draft.CarbsG),
+            FatG = (int)Math.Round(draft.FatG),
             Tags = string.Join(", ", draft.Tags),
             StepsRaw = string.Join("\n", draft.Steps),
             Ingredients = draft.Ingredients.Select(i => new IngredientReviewRow
@@ -86,7 +86,7 @@ public class RecipeImportController(
                 Quantity = i.Quantity,
                 Unit = i.Unit,
                 Category = i.Category,
-                CaloriesPerUnit = i.CaloriesPerUnit
+                CaloriesPerUnit = (int)Math.Round(i.CaloriesPerUnit)
             }).ToList()
         };
 

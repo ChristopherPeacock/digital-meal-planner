@@ -35,7 +35,7 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
         if (model.CoverImage is not null)
             imagePath = await imageStorage.SaveAsync(model.CoverImage);
 
-        var cookbook = await cookbookService.CreateAsync(UserId, model.Name, model.Description, imagePath);
+        var cookbook = await cookbookService.CreateAsync(UserId, model.Name, model.Description ?? string.Empty, imagePath);
         return Redirect($"/cookbooks/{cookbook.Id}");
     }
 
@@ -63,7 +63,7 @@ public class CookbooksController(ICookbookService cookbookService, IImageStorage
         if (model.CoverImage is not null)
             newImagePath = await imageStorage.SaveAsync(model.CoverImage);
 
-        await cookbookService.UpdateAsync(id, UserId, model.Name, model.Description, newImagePath);
+        await cookbookService.UpdateAsync(id, UserId, model.Name, model.Description ?? string.Empty, newImagePath);
         return Redirect($"/cookbooks/{id}");
     }
 

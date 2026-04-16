@@ -11,7 +11,7 @@ public class CookbookFormViewModel
     public string Name { get; set; } = string.Empty;
 
     [MaxLength(500)]
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public string? ExistingCoverImagePath { get; set; }
     public IFormFile? CoverImage { get; set; }
