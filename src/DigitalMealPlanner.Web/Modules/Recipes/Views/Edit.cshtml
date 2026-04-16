@@ -15,17 +15,20 @@
     @Html.AntiForgeryToken()
     <input type="hidden" name="CookbookId"   value="@Model.CookbookId" />
     <input type="hidden" name="CookbookName" value="@Model.CookbookName" />
-    <input type="hidden" name="ImagePath"    value="@Model.ImagePath" />
+    @for (int img = 0; img < Model.ImagePaths.Count; img++)
+    {
+        <input type="hidden" name="ImagePaths[@img]" value="@Model.ImagePaths[img]" />
+    }
 
     <div class="review-layout">
 
         <!-- Left: image -->
         <div class="review-image">
             <div class="lbl">Photo</div>
-            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            @if (Model.ImagePaths.Count > 0)
             {
                 <div class="img-card card" style="margin-bottom:.75rem">
-                    <img id="edit-preview" src="@Model.ImagePath" alt="Recipe photo" style="width:100%;display:block;max-height:340px;object-fit:cover;" />
+                    <img id="edit-preview" src="@Model.ImagePaths[0]" alt="Recipe photo" style="width:100%;display:block;max-height:340px;object-fit:cover;" />
                 </div>
             }
             <label class="btn btn-outline btn-sm" style="cursor:pointer">

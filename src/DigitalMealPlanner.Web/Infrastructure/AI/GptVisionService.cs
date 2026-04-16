@@ -44,28 +44,32 @@ public class GptVisionService(AnthropicClient client, ILogger<GptVisionService> 
         Return only the JSON object.
         """;
 
-    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imageDataUri)
+    public async Task<RecipeDraft> ParseRecipeFromImageAsync(IReadOnlyList<string> imageDataUris)
     {
-        var (mediaType, base64) = ParseDataUri(imageDataUri);
+        var contentParts = new List<ContentBase>();
+
+        foreach (var dataUri in imageDataUris)
+        {
+            var (mediaType, base64) = ParseDataUri(dataUri);
+            contentParts.Add(new ImageContent
+            {
+                Source = new ImageSource
+                {
+                    Type      = SourceType.base64,
+                    MediaType = mediaType,
+                    Data      = base64
+                }
+            });
+        }
+
+        contentParts.Add(new TextContent { Text = Prompt });
 
         var messages = new List<Message>
         {
             new()
             {
                 Role = RoleType.User,
-                Content =
-                [
-                    new ImageContent
-                    {
-                        Source = new ImageSource
-                        {
-                            Type      = SourceType.base64,
-                            MediaType = mediaType,
-                            Data      = base64
-                        }
-                    },
-                    new TextContent { Text = Prompt }
-                ]
+                Content = contentParts
             }
         };
 

@@ -41,7 +41,7 @@ public class OpenAiVisionService(IConfiguration configuration, ILogger<OpenAiVis
         Return only the JSON object.
         """;
 
-    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imageDataUri)
+    public async Task<RecipeDraft> ParseRecipeFromImageAsync(IReadOnlyList<string> imageDataUris)
     {
         var apiKey =
             Environment.GetEnvironmentVariable("OPENAI_API", EnvironmentVariableTarget.Process)
@@ -55,16 +55,19 @@ public class OpenAiVisionService(IConfiguration configuration, ILogger<OpenAiVis
 
         var model = configuration["OpenAI:Model"] ?? "gpt-4o";
 
-        var (mediaType, imageBytes) = ParseDataUri(imageDataUri);
+        var parts = new List<ChatMessageContentPart>();
+        foreach (var dataUri in imageDataUris)
+        {
+            var (mediaType, imageBytes) = ParseDataUri(dataUri);
+            parts.Add(ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mediaType));
+        }
+        parts.Add(ChatMessageContentPart.CreateTextPart(Prompt));
 
         var client = new ChatClient(model, apiKey);
 
         ChatCompletion completion = await client.CompleteChatAsync(
         [
-            new UserChatMessage(
-                ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mediaType),
-                ChatMessageContentPart.CreateTextPart(Prompt)
-            )
+            new UserChatMessage(parts)
         ]);
 
         var json = completion.Content[0].Text;

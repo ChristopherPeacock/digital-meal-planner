@@ -6,14 +6,15 @@ public class RecipeImportViewModel
 {
     public int CookbookId { get; set; }
     public string CookbookName { get; set; } = string.Empty;
-    public IFormFile? Image { get; set; }
+    public List<IFormFile>? Images { get; set; }
 }
 
 public class RecipeReviewViewModel
 {
     public int CookbookId { get; set; }
     public string CookbookName { get; set; } = string.Empty;
-    public string ImagePath { get; set; } = string.Empty;
+    public List<string> ImagePaths { get; set; } = [];
+    public int SelectedImageIndex { get; set; }
 
     [Required] public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

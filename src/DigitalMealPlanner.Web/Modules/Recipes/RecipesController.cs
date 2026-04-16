@@ -38,7 +38,7 @@ public class RecipesController(
         {
             CookbookId = cookbookId,
             CookbookName = recipe.Cookbook.Name,
-            ImagePath = recipe.ImagePath,
+            ImagePaths = string.IsNullOrEmpty(recipe.ImagePath) ? [] : [recipe.ImagePath],
             Title = recipe.Title,
             Description = recipe.Description,
             Servings = recipe.Servings,
@@ -77,7 +77,7 @@ public class RecipesController(
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(t => t.Trim()).Where(t => t.Length > 0).ToList();
 
-        var imagePath = model.ImagePath;
+        var imagePath = model.ImagePaths.ElementAtOrDefault(model.SelectedImageIndex) ?? model.ImagePaths.FirstOrDefault() ?? string.Empty;
         if (newImage is not null && newImage.Length > 0)
             imagePath = await imageStorage.SaveAsync(newImage);
 

@@ -4,5 +4,5 @@ namespace DigitalMealPlanner.Web.Infrastructure.AI;
 
 public interface IGptVisionService
 {
-    Task<RecipeDraft> ParseRecipeFromImageAsync(string imagePath);
+    Task<RecipeDraft> ParseRecipeFromImageAsync(IReadOnlyList<string> imageDataUris);
 }

@@ -13,19 +13,27 @@
     @Html.AntiForgeryToken()
     <input type="hidden" name="CookbookId"   value="@Model.CookbookId" />
     <input type="hidden" name="CookbookName" value="@Model.CookbookName" />
-    <input type="hidden" name="ImagePath"    value="@Model.ImagePath" />
+    @for (int img = 0; img < Model.ImagePaths.Count; img++)
+    {
+        <input type="hidden" name="ImagePaths[@img]" value="@Model.ImagePaths[img]" />
+    }
 
     <div class="review-layout">
 
-        <!-- Left: image -->
+        <!-- Left: images -->
         <div class="review-image">
-            <div class="lbl">📸 The Screenshot</div>
-            @if (!string.IsNullOrEmpty(Model.ImagePath))
-            {
-                <div class="img-card card">
-                    <img src="@Model.ImagePath" alt="Recipe screenshot" style="width:100%;display:block;max-height:340px;object-fit:cover;" />
-                </div>
-            }
+            <div class="lbl">📸 Screenshots (@Model.ImagePaths.Count)</div>
+            <div class="image-picker">
+                @for (int img = 0; img < Model.ImagePaths.Count; img++)
+                {
+                    <label class="image-pick-option @(img == Model.SelectedImageIndex ? "selected" : "")">
+                        <input type="radio" name="SelectedImageIndex" value="@img"
+                               @(img == Model.SelectedImageIndex ? "checked" : "") />
+                        <img src="@Model.ImagePaths[img]" alt="Screenshot @(img + 1)" />
+                        <span class="pick-badge">@(img == Model.SelectedImageIndex ? "★ Display" : "Select")</span>
+                    </label>
+                }
+            </div>
         </div>
 
         <!-- Right: extracted data -->
@@ -158,5 +166,18 @@ function reindex() {
         });
     });
 }
+
+// Image picker radio interaction
+document.querySelectorAll('.image-pick-option input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        document.querySelectorAll('.image-pick-option').forEach(opt => {
+            opt.classList.remove('selected');
+            opt.querySelector('.pick-badge').textContent = 'Select';
+        });
+        const label = radio.closest('.image-pick-option');
+        label.classList.add('selected');
+        label.querySelector('.pick-badge').textContent = '★ Display';
+    });
+});
 </script>
 }

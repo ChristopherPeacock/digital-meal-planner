@@ -10,16 +10,16 @@ public class FallbackVisionService(
     OpenAiVisionService openAi,
     ILogger<FallbackVisionService> logger) : IGptVisionService
 {
-    public async Task<RecipeDraft> ParseRecipeFromImageAsync(string imagePath)
+    public async Task<RecipeDraft> ParseRecipeFromImageAsync(IReadOnlyList<string> imageDataUris)
     {
         try
         {
-            return await claude.ParseRecipeFromImageAsync(imagePath);
+            return await claude.ParseRecipeFromImageAsync(imageDataUris);
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Claude vision failed, falling back to OpenAI.");
-            return await openAi.ParseRecipeFromImageAsync(imagePath);
+            return await openAi.ParseRecipeFromImageAsync(imageDataUris);
         }
     }
 }

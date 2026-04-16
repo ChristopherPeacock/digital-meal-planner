@@ -39,21 +39,26 @@ public class RecipeImportController(
         var cookbook = await cookbookService.GetByIdAsync(cookbookId, UserId);
         if (cookbook is null) return NotFound();
 
-        if (model.Image is null || model.Image.Length == 0)
+        if (model.Images is null || model.Images.Count == 0)
         {
-            ModelState.AddModelError(string.Empty, "Please select an image.");
+            ModelState.AddModelError(string.Empty, "Please select at least one image.");
             model.CookbookName = cookbook.Name;
             return View("~/Modules/Recipes/Views/Import.cshtml", model);
         }
 
-        // Save image
-        var imagePath = await imageStorage.SaveAsync(model.Image);
+        // Save all images
+        var imagePaths = new List<string>();
+        foreach (var img in model.Images)
+        {
+            if (img.Length > 0)
+                imagePaths.Add(await imageStorage.SaveAsync(img));
+        }
 
-        // Call Claude Vision
+        // Call Claude Vision with all images
         RecipeDraft draft;
         try
         {
-            draft = await gptVision.ParseRecipeFromImageAsync(imagePath);
+            draft = await gptVision.ParseRecipeFromImageAsync(imagePaths);
         }
         catch (Exception ex)
         {
@@ -67,7 +72,8 @@ public class RecipeImportController(
         {
             CookbookId = cookbookId,
             CookbookName = cookbook.Name,
-            ImagePath = imagePath,
+            ImagePaths = imagePaths,
+            SelectedImageIndex = 0,
             Title = draft.Title,
             Description = draft.Description,
             Servings = draft.Servings > 0 ? draft.Servings : 1,
@@ -129,7 +135,7 @@ public class RecipeImportController(
             ProteinG = model.ProteinG,
             CarbsG = model.CarbsG,
             FatG = model.FatG,
-            ImagePath = model.ImagePath,
+            ImagePath = model.ImagePaths.ElementAtOrDefault(model.SelectedImageIndex) ?? model.ImagePaths.FirstOrDefault() ?? string.Empty,
             StepsJson = JsonSerializer.Serialize(steps),
             TagsJson = JsonSerializer.Serialize(tags),
             Ingredients = model.Ingredients.Select(i => new Ingredient
