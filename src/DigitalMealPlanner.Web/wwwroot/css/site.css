@@ -47,6 +47,7 @@ body {
   text-decoration: none;
   letter-spacing: .05em;
 }
+.nav-menu { display: flex; align-items: center; gap: 1.5rem; flex: 1; }
 .nav-links { display: flex; gap: 1.25rem; flex: 1; }
 .nav-links a {
   color: rgba(255,255,255,.7);
@@ -71,6 +72,51 @@ body {
   transition: all .15s;
 }
 .btn-ghost:hover { border-color: var(--white); color: var(--white); }
+
+/* Hamburger button — hidden on desktop */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: .25rem;
+  margin-left: auto;
+}
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--white);
+  margin: 5px 0;
+  border-radius: 2px;
+  transition: transform .25s, opacity .25s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 513px) {
+  .nav-hamburger { display: block; }
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--dark);
+    padding: 1rem 1.5rem;
+    gap: .75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  }
+  .nav-menu.open { display: flex; }
+  .app-nav { flex-wrap: wrap; position: relative; }
+  .nav-links { flex-direction: column; gap: .75rem; }
+  .nav-links a { font-size: 1rem; }
+  .nav-logout { margin-left: 0; margin-top: .25rem; }
+  .btn-ghost { width: 100%; text-align: center; padding: .5rem; }
+}
 
 /* --- Layout --- */
 .main-content { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
@@ -268,6 +314,21 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   letter-spacing: .04em;
 }
 
+@media (max-width: 500px) {
+  .page-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .page-header .btn { align-self: center; }
+  .page-header > div { justify-content: center; }
+  .lbl {
+    justify-content: center;
+  }
+  .lbl::after { display: none; }
+  .mt-3 { text-align: center; }
+}
+
 /* --- Login page --- */
 .login-wrap {
   min-height: calc(100vh - 0px);
@@ -312,8 +373,12 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 /* --- Cookbook grid --- */
 .cookbook-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1.25rem;
+}
+
+@media (max-width: 450px) {
+  .cookbook-grid { grid-template-columns: 1fr; }
 }
 .cookbook-card {
   text-decoration: none;
@@ -406,7 +471,20 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 @media (max-width: 768px) {
   .review-layout { grid-template-columns: 1fr; }
 }
-.review-image { position: sticky; top: 5rem; }
+.review-image { align-self: start; }
+
+@media (max-width: 511px) {
+  .page-header { text-align: center; }
+  .review-fields { text-align: center; }
+  .review-fields .lbl { justify-content: center; }
+  .review-fields .lbl::after { display: none; }
+  .review-fields > .btn { display: block; margin-left: auto; margin-right: auto; }
+  .action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .action-bar .btn { text-align: center; }
+}
 
 /* --- Ingredient rows in review form --- */
 .ing-row { margin-bottom: .4rem; }
@@ -485,6 +563,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 /* ── Day-tab strip ──────────────────────────────────── */
 .planner-day-tabs {
   display: flex;
+  justify-content: center;
   gap: .3rem;
   overflow-x: auto;
   padding-bottom: .4rem;
@@ -534,6 +613,22 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .day-tab.active.today-tab {
   background: var(--red);
   border-color: var(--red);
+}
+
+@media (max-width: 391px) {
+  .planner-day-tabs {
+    justify-content: flex-start;
+    padding-left: .75rem;
+    padding-right: .75rem;
+    scroll-snap-type: x mandatory;
+  }
+  .day-tab {
+    scroll-snap-align: center;
+    min-width: 42px;
+    padding: .35rem .45rem;
+  }
+  .day-tab .tab-num { font-size: .95rem; }
+  .day-tab .tab-name { font-size: .52rem; }
 }
 
 /* ── Scroll wrapper ─────────────────────────────────── */

@@ -16,15 +16,19 @@
     {
         <nav class="app-nav">
             <a class="nav-brand" href="/">🍽️ Meal Planner</a>
-            <div class="nav-links">
-                <a href="/cookbooks">Cookbooks</a>
-                <a href="/mealplan">Planner</a>
-                <a href="/themes">Themes</a>
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-menu" id="nav-menu">
+                <div class="nav-links">
+                    <a href="/cookbooks">Cookbooks</a>
+                    <a href="/mealplan">Planner</a>
+                </div>
+                <form method="post" action="/logout" class="nav-logout">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-ghost">Sign Out</button>
+                </form>
             </div>
-            <form method="post" action="/logout" class="nav-logout">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn-ghost">Sign Out</button>
-            </form>
         </nav>
     }
 

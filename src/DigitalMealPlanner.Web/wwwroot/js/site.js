@@ -1,5 +1,17 @@
 ﻿// Digital Meal Planner — site.js
 
+// Hamburger menu toggle
+(function () {
+    const btn = document.getElementById('nav-hamburger');
+    const menu = document.getElementById('nav-menu');
+    if (!btn || !menu) return;
+    btn.addEventListener('click', () => {
+        const open = btn.classList.toggle('open');
+        menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open);
+    });
+})();
+
 // PWA service worker registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

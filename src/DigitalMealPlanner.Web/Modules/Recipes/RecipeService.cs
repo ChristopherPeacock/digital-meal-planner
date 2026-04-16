@@ -79,6 +79,11 @@ public class RecipeService(AppDbContext db) : IRecipeService
             .FirstOrDefaultAsync(r => r.Id == id && r.Cookbook.UserId == userId)
             ?? throw new UnauthorizedAccessException("Recipe not found or access denied.");
 
+        var mealPlanEntries = await db.MealPlanEntries
+            .Where(e => e.RecipeId == id)
+            .ToListAsync();
+        db.MealPlanEntries.RemoveRange(mealPlanEntries);
+
         db.Recipes.Remove(recipe);
         await db.SaveChangesAsync();
     }
