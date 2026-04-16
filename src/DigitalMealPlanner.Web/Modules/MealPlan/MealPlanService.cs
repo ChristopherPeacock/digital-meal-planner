@@ -18,6 +18,13 @@ public class MealPlanService(AppDbContext db) : IMealPlanService
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<MealTheme>> GetThemesAsync(string userId) =>
+        await db.MealThemes
+            .Where(t => t.UserId == userId)
+            .OrderBy(t => t.IsDefault ? 0 : 1)
+            .ThenBy(t => t.Name)
+            .ToListAsync();
+
     public async Task<MealPlanEntry> AssignAsync(string userId, DateOnly date, int themeId, int recipeId, int servings)
     {
         var recipeExists = await db.Recipes

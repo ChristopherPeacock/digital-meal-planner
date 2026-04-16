@@ -1,0 +1,152 @@
+@using DigitalMealPlanner.Web.Modules.MealPlan.Models
+@model MealPlanWeekViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Meal Planner";
+    var today      = DateOnly.FromDateTime(DateTime.Today);
+    var prevWeek   = Model.WeekStart.AddDays(-7).ToString("yyyy-MM-dd");
+    var nextWeek   = Model.WeekStart.AddDays(7).ToString("yyyy-MM-dd");
+    var weekEnd    = Model.WeekStart.AddDays(6);
+    var todayIdx   = Model.Days.IndexOf(today);   // -1 if today is not in this week
+    string DayLabel(DateOnly d) => d.ToString("ddd d MMM");
+}
+
+<div class="page-header">
+    <h1>Planner</h1>
+</div>
+
+<!-- Week navigation -->
+<nav class="planner-week-nav">
+    <a href="/mealplan?week=@prevWeek">&#8592; Prev</a>
+    <span class="planner-week-label">
+        @Model.WeekStart.ToString("d MMM") &ndash; @weekEnd.ToString("d MMM yyyy")
+    </span>
+    <a href="/mealplan?week=@nextWeek">Next &#8594;</a>
+</nav>
+
+<!-- Day tabs (mobile) -->
+<div class="planner-day-tabs" role="tablist">
+    @for (int d = 0; d < Model.Days.Count; d++)
+    {
+        var day = Model.Days[d];
+        <button class="day-tab @(day == today ? "today-tab" : "")"
+                data-day="@d"
+                role="tab"
+                onclick="plannerActivateDay(@d)">
+            <span class="tab-name">@day.ToString("ddd")</span>
+            <span class="tab-num">@day.Day</span>
+        </button>
+    }
+</div>
+
+<!-- Calendar grid -->
+<div class="planner-scroll-wrap" id="planner-scroll-wrap">
+<div class="planner-grid" id="planner-grid" data-today-idx="@todayIdx">
+
+    <!-- Corner -->
+    <div class="planner-corner" aria-hidden="true"></div>
+
+    <!-- Day headers -->
+    @for (int d = 0; d < Model.Days.Count; d++)
+    {
+        var day = Model.Days[d];
+        <div class="planner-day-hd @(day == today ? "is-today" : "")" data-day="@d" role="columnheader">
+            <span class="hd-name">@day.ToString("ddd")</span>
+            <span class="hd-num">@day.Day</span>
+        </div>
+    }
+
+    <!-- Theme rows -->
+    @foreach (var theme in Model.Themes)
+    {
+        <!-- Theme label -->
+        <div class="planner-theme-lbl" style="--tc: @theme.ColourHex">
+            <span class="theme-icon" aria-hidden="true">@theme.Icon</span>
+            <span class="theme-name">@theme.Name</span>
+        </div>
+
+        <!-- One cell per day -->
+        @for (int d = 0; d < Model.Days.Count; d++)
+        {
+            var day      = Model.Days[d];
+            var entries  = Model.GetEntries(day, theme.Id);
+            var dateStr  = day.ToString("yyyy-MM-dd");
+            <div class="planner-cell"
+                 data-day="@d"
+                 data-date="@dateStr"
+                 data-theme-id="@theme.Id"
+                 role="gridcell">
+
+                @foreach (var entry in entries)
+                {
+                    <div class="cal-entry" data-entry-id="@entry.Id" style="--tc: @theme.ColourHex">
+                        <span class="cal-entry-title">@entry.Recipe.Title</span>
+                        <button class="cal-entry-remove"
+                                aria-label="Remove @entry.Recipe.Title"
+                                onclick="plannerRemoveEntry(event, @entry.Id)">&#215;</button>
+                    </div>
+                }
+
+                <button class="cal-add-btn"
+                        aria-label="Add recipe to @theme.Name on @DayLabel(day)"
+                        data-date="@dateStr"
+                        data-theme-id="@theme.Id"
+                        data-theme-name="@theme.Name"
+                        data-day-label="@DayLabel(day)"
+                        onclick="plannerOpenSheet(this)">+</button>
+            </div>
+        }
+    }
+</div>
+</div>
+
+<!-- Recipe picker bottom sheet -->
+<div class="sheet-backdrop" id="sheet-backdrop" hidden aria-modal="true" role="dialog" aria-label="Pick a recipe">
+    <div class="sheet" id="sheet">
+        <div class="sheet-drag-handle" aria-hidden="true"></div>
+        <div class="sheet-header">
+            <span id="sheet-title" class="sheet-title">Add Recipe</span>
+            <button class="sheet-close" onclick="plannerCloseSheet()" aria-label="Close">&#x2715;</button>
+        </div>
+        <div class="sheet-search-wrap">
+            <input type="text"
+                   class="sheet-search"
+                   id="sheet-search"
+                   placeholder="Search recipes&hellip;"
+                   autocomplete="off"
+                   oninput="plannerSearchRecipes(this.value)" />
+        </div>
+        <div class="sheet-body" id="sheet-body">
+            @if (!Model.Cookbooks.Any(cb => cb.Recipes.Any()))
+            {
+                <p style="text-align:center;padding:2rem;color:var(--muted);font-size:.85rem;">
+                    No recipes yet — import some from a cookbook first.
+                </p>
+            }
+            @foreach (var cookbook in Model.Cookbooks)
+            {
+                if (!cookbook.Recipes.Any()) continue;
+                <div class="sheet-cookbook">
+                    <div class="sheet-cookbook-name">@cookbook.Name</div>
+                    @foreach (var recipe in cookbook.Recipes.OrderBy(r => r.Title))
+                    {
+                        <button class="sheet-recipe"
+                                data-recipe-id="@recipe.Id"
+                                data-recipe-title="@recipe.Title.ToLower()"
+                                onclick="plannerPickRecipe(@recipe.Id)">
+                            <span>@recipe.Title</span>
+                            <span class="sheet-recipe-cal">@recipe.CaloriesPerServing kcal</span>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for antiforgery token (read by JS) -->
+<form id="af-form" hidden>@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script src="~/js/planner.js" asp-append-version="true"></script>
+}

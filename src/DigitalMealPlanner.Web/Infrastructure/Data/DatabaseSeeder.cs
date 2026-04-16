@@ -29,7 +29,6 @@ public static class DatabaseSeeder
             new MealTheme { Name = "Breakfast", Icon = "🌅", ColourHex = "#f4a261", IsDefault = true, UserId = robyn.Id },
             new MealTheme { Name = "Lunch",     Icon = "🥗", ColourHex = "#2a9d8f", IsDefault = true, UserId = robyn.Id },
             new MealTheme { Name = "Dinner",    Icon = "🍽️", ColourHex = "#e63946", IsDefault = true, UserId = robyn.Id },
-            new MealTheme { Name = "Dessert",   Icon = "🍰", ColourHex = "#9b5de5", IsDefault = true, UserId = robyn.Id },
         };
 
         context.MealThemes.AddRange(defaultThemes);
