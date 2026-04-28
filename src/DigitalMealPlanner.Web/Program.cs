@@ -16,10 +16,16 @@ QuestPDF.Settings.License = LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Database ---
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
-Directory.CreateDirectory(dbPath);
+// On Azure App Service D:\home persists across deployments; D:\home\site\wwwroot does not.
+// Use WEBSITE_CONTENTSHARE env var presence to detect Azure, then store db outside wwwroot.
+var isAzure = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
+var dbDir = isAzure
+    ? @"D:\home\data\App_Data"
+    : Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+Directory.CreateDirectory(dbDir);
+var dbConnectionString = $"Data Source={Path.Combine(dbDir, "mealplanner.db")}";
 builder.Services.AddDbContext<AppDbContext>(o =>
-    o.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    o.UseSqlite(dbConnectionString));
 
 // --- Identity ---
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
