@@ -1,6 +1,20 @@
 ## .NET / ASP.NET Core
 bin/
 obj/
+publish/
+*.dll
+*.pdb
+*.exe
+*.nupkg
+*.zip
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.bmp
+*.tiff
+*.ico
 *.user
 *.suo
 .vs/
@@ -19,14 +33,4 @@ secrets.json
 ## OS
 .DS_Store
 Thumbs.db
-src/DigitalMealPlanner.Web/wwwroot/uploads/4d062a76-cc55-4552-a062-6073a55d4eb1.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/022dabab-efce-4c8a-a5e7-a5f8c7463e4d.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/43b07470-b673-4580-bf6e-1594374a60a3.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/3031ba5c-8034-4c9a-b4e5-f1fb9c641384.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/332ce544-b9e4-4d0c-ac66-e2dedd45aec1.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/ab26c298-ee59-46da-83e5-25846511a7a7.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/d790d12d-f5b9-461b-8227-9fe1b6454430.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/e61978de-9df3-43a3-95eb-a68659c920c1.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/ea479ccd-45d1-419c-a644-9338d40eeb10.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/dbfb22c7-77ae-4072-9be4-e820b30a8a29.jpeg
-src/DigitalMealPlanner.Web/wwwroot/uploads/d6bd93c5-0d47-4ca9-aa9a-062bfb62aa44.jpeg
+## (specific upload files removed — covered by wwwroot/uploads/ above)
