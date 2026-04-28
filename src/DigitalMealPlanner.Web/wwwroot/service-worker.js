@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meal-planner-v2';
+const CACHE_NAME = 'meal-planner-v3';
 const PRECACHE = [
   '/',
   '/css/site.css',
@@ -27,12 +27,15 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
 
-  // Always go network-first for navigation and API calls
-  if (request.mode === 'navigate' || request.url.includes('/api/')) {
+  // Never intercept non-GET requests (POST, DELETE, etc.)
+  if (request.method !== 'GET') return;
+
+  // Network-first for navigation (HTML pages)
+  if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then(response => {
-          if (request.method === 'GET' && response.ok) {
+          if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
           }
@@ -43,8 +46,17 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first for static assets
+  // Cache-first for static assets, with graceful network fallback
   event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request))
+    caches.match(request).then(cached => {
+      if (cached) return cached;
+      return fetch(request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+        }
+        return response;
+      });
+    })
   );
 });
