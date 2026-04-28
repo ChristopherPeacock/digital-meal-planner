@@ -3,8 +3,9 @@
 @{
     ViewData["Title"] = Model.Title;
     Layout = "_Layout";
-    var steps = JsonSerializer.Deserialize<List<string>>(Model.StepsJson) ?? [];
-    var tags  = JsonSerializer.Deserialize<List<string>>(Model.TagsJson)  ?? [];
+    List<string> steps, tags;
+    try { steps = JsonSerializer.Deserialize<List<string>>(Model.StepsJson) ?? []; } catch { steps = []; }
+    try { tags  = JsonSerializer.Deserialize<List<string>>(Model.TagsJson)  ?? []; } catch { tags  = []; }
 }
 
 <div class="page-header">

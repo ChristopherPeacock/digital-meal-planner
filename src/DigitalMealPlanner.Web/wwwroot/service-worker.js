@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meal-planner-v1';
+const CACHE_NAME = 'meal-planner-v2';
 const PRECACHE = [
   '/',
   '/css/site.css',
@@ -32,8 +32,10 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(request)
         .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          if (request.method === 'GET' && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          }
           return response;
         })
         .catch(() => caches.match(request))

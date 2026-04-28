@@ -31,8 +31,9 @@ public class RecipesController(
         var recipe = await recipeService.GetByIdAsync(recipeId, UserId);
         if (recipe is null || recipe.CookbookId != cookbookId) return NotFound();
 
-        var steps = JsonSerializer.Deserialize<List<string>>(recipe.StepsJson) ?? [];
-        var tags  = JsonSerializer.Deserialize<List<string>>(recipe.TagsJson)  ?? [];
+        List<string> steps, tags;
+        try { steps = JsonSerializer.Deserialize<List<string>>(recipe.StepsJson) ?? []; } catch { steps = []; }
+        try { tags  = JsonSerializer.Deserialize<List<string>>(recipe.TagsJson)  ?? []; } catch { tags  = []; }
 
         var vm = new RecipeReviewViewModel
         {
